@@ -29,3 +29,6 @@ yarn-error.log*
 
 .parcel-cache
 .idea/
+
+# React Router
+.react-router/
