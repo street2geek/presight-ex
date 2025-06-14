@@ -42,13 +42,14 @@ function getTopHobbies(users: Users, topAmount = 20) {
 }
 
 export function usersHandler(req: Request, res: Response) {
-  const { limit = 50, query = "", filters = "" } = req.query;
+  const { limit = 40, query = "" } = req.query;
+
   const users = faker.helpers.multiple(createRandomUser, {
     count: Number(limit),
   });
 
   res.json({
-    users,
+    users: users,
     filters: {
       nationalities: getNationalities(users),
       topHobbies: getTopHobbies(users),

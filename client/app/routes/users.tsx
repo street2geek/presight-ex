@@ -4,8 +4,7 @@ import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { useFetcher, useSearchParams } from "react-router";
 
 import type { Route } from "./+types/users";
-import { getUsers } from "~/lib/api";
-import { updateFilterParams } from "~/lib/utils";
+import { getUsers, type UserEntity } from "~/lib/api";
 import { Sidebar } from "~/components/ui/Sidebar";
 import { Card } from "~/components/ui/Card";
 import { Search } from "~/components/ui/Search";
@@ -23,10 +22,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function Users({ loaderData }: Route.ComponentProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
   const parentRef = React.useRef(null);
   const { users: initalUsers, filters } = loaderData;
   const [users, setUsers] = useState(initalUsers);
+  const [filteredUsers, setFilteredUsers] = useState<UserEntity[]>();
+  const [selectedNationalities, setSelectedNationalities] = useState([""]);
+  const [selectedHobbies, setSelectedHobbies] = useState([""]);
 
   const fetcher = useFetcher<Awaited<typeof getUsers>>();
   const [observerRef, entry] = useIntersectionObserver({
@@ -35,17 +36,13 @@ export default function Users({ loaderData }: Route.ComponentProps) {
   });
 
   const rowVirtualizer = useVirtualizer({
-    count: users.length,
+    count: filteredUsers?.length ?? users.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 35,
     overscan: 5,
   });
 
-  function handleUpdateFilters() {
-    const newParams = updateFilterParams(searchParams);
-  }
-
-  async function handleUpdateUsers() {
+  async function handleAppendUsers() {
     if (fetcher.state === "loading") {
       return;
     }
@@ -60,9 +57,27 @@ export default function Users({ loaderData }: Route.ComponentProps) {
     }
   }
 
+  async function handleUpdateUsers() {
+    const usersByNationality = users.filter((user) => {
+      return selectedNationalities.includes(user.nationality);
+    });
+
+    const usersByHobbies = users.filter((user) => {
+      return user.hobbies.some((u) => selectedHobbies.includes(u));
+    });
+
+    const newUsers = [...usersByNationality, ...usersByHobbies];
+
+    setFilteredUsers(!newUsers.length ? undefined : newUsers);
+  }
+
+  useEffect(() => {
+    handleUpdateUsers();
+  }, [selectedHobbies, selectedNationalities]);
+
   useEffect(() => {
     if (entry?.isIntersecting) {
-      handleUpdateUsers();
+      handleAppendUsers();
     }
   }, [entry?.isIntersecting]);
 
@@ -72,6 +87,10 @@ export default function Users({ loaderData }: Route.ComponentProps) {
         <div className="grid grid-cols-4 gap-6 md:grid-cols-8 lg:grid-cols-12">
           <aside className="col-span-4 lg:col-span-3">
             <Sidebar
+              selectedHobbies={selectedHobbies}
+              selectedNationalities={selectedNationalities}
+              setSelectedHobbies={setSelectedHobbies}
+              setSelectedNationalities={setSelectedNationalities}
               hobbies={filters.topHobbies}
               nationalities={filters.nationalities}
             />
@@ -82,7 +101,9 @@ export default function Users({ loaderData }: Route.ComponentProps) {
             </section>
             <section className="pt-8 flex flex-col gap-10">
               {rowVirtualizer.getVirtualItems().map((item) => {
-                const user = users[item.index];
+                const user = !filteredUsers
+                  ? users[item.index]
+                  : filteredUsers[item.index];
                 return (
                   <Card
                     key={item.index}

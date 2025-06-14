@@ -1,12 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { updateFilters } from "~/lib/utils";
 
 type SidebarPops = {
-  hobbies?: string[];
-  nationalities?: string[];
+  hobbies: string[];
+  nationalities: string[];
+  selectedHobbies: string[];
+  selectedNationalities: string[];
+  setSelectedHobbies: React.Dispatch<React.SetStateAction<string[]>>;
+  setSelectedNationalities: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
-export function Sidebar({ hobbies, nationalities }: SidebarPops) {
+export function Sidebar({
+  hobbies,
+  nationalities,
+  selectedHobbies,
+  selectedNationalities,
+  setSelectedHobbies,
+  setSelectedNationalities,
+}: SidebarPops) {
   const [isSideNavOpen, setIsSideNavOpen] = useState(false);
+
+  function handleUpdateNationalites(selectedItem: string) {
+    const newArray = updateFilters(selectedNationalities, selectedItem);
+    setSelectedNationalities(newArray);
+  }
+
+  function handleUpdateHobbies(selectedItem: string) {
+    const newArray = updateFilters(selectedHobbies, selectedItem);
+    console.log(newArray);
+    setSelectedHobbies(newArray);
+  }
 
   return (
     <>
@@ -60,22 +83,28 @@ export function Sidebar({ hobbies, nationalities }: SidebarPops) {
           aria-label="side navigation"
           className="flex-1 divide-y divide-slate-100 overflow-auto"
         >
-          <div className="h-[280px] scroll-auto">
-            <h4 className="pl-6 mt-4 underline text-slate-700">Hobbies</h4>
-            <ul className="flex flex-1 flex-col gap-1 py-3">
-              <li className="px-6 relative flex flex-wrap items-center">
-                <input
-                  className="w-4 h-4 transition-colors bg-white border-2 rounded appearance-none cursor-pointer focus-visible:outline-none peer border-slate-500 checked:border-emerald-500 checked:bg-emerald-500 checked:hover:border-emerald-600 checked:hover:bg-emerald-600 focus:outline-none checked:focus:border-emerald-700 checked:focus:bg-emerald-700 disabled:cursor-not-allowed disabled:border-slate-100 disabled:bg-slate-50"
-                  type="checkbox"
-                  id="id-c01"
-                />
-                <label
-                  className="pl-2 cursor-pointer text-slate-500 peer-disabled:cursor-not-allowed peer-disabled:text-slate-400"
-                  htmlFor="id-c01"
+          <div className="pb-4">
+            <h4 className="pl-6 my-4 underline text-slate-700">Hobbies</h4>
+            <ul className="flex flex-1 flex-col gap-1 py-3 h-[280px] scroll-auto overflow-auto">
+              {hobbies?.map((hob) => (
+                <li
+                  key={hob}
+                  className="px-6 relative flex flex-wrap items-center"
                 >
-                  Hobbie
-                </label>
-              </li>
+                  <input
+                    className="w-4 h-4 transition-colors bg-white border-2 rounded appearance-none cursor-pointer focus-visible:outline-none peer border-slate-500 checked:border-emerald-500 checked:bg-emerald-500 checked:hover:border-emerald-600 checked:hover:bg-emerald-600 focus:outline-none checked:focus:border-emerald-700 checked:focus:bg-emerald-700 disabled:cursor-not-allowed disabled:border-slate-100 disabled:bg-slate-50"
+                    type="checkbox"
+                    id={hob}
+                    onChange={() => handleUpdateHobbies(hob)}
+                  />
+                  <label
+                    className="pl-2 cursor-pointer text-slate-500 peer-disabled:cursor-not-allowed peer-disabled:text-slate-400"
+                    htmlFor={hob}
+                  >
+                    {hob}
+                  </label>
+                </li>
+              ))}
             </ul>
           </div>
           <div className="">
@@ -89,11 +118,12 @@ export function Sidebar({ hobbies, nationalities }: SidebarPops) {
                   <input
                     className="w-4 h-4 transition-colors bg-white border-2 rounded appearance-none cursor-pointer focus-visible:outline-none peer border-slate-500 checked:border-emerald-500 checked:bg-emerald-500 checked:hover:border-emerald-600 checked:hover:bg-emerald-600 focus:outline-none checked:focus:border-emerald-700 checked:focus:bg-emerald-700 disabled:cursor-not-allowed disabled:border-slate-100 disabled:bg-slate-50"
                     type="checkbox"
-                    id="id-c01"
+                    id={nat}
+                    onChange={() => handleUpdateNationalites(nat)}
                   />
                   <label
                     className="pl-2 cursor-pointer text-slate-500 peer-disabled:cursor-not-allowed peer-disabled:text-slate-400"
-                    htmlFor="id-c01"
+                    htmlFor={nat}
                   >
                     {nat}
                   </label>
