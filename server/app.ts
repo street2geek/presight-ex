@@ -1,10 +1,13 @@
-const express = require("express");
-const app = express();
-const port = 3000;
+import express from "express";
+import cors from "cors";
+import { usersHandler } from "./handlers/users.handler.ts";
 
-app.get("/", (_req, res) => {
-  res.send("Hello World!");
-});
+const app = express();
+const port = 3001;
+
+app.use(cors());
+
+app.get("/users", usersHandler);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

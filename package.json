@@ -12,6 +12,7 @@
     "start": "lerna run start",
     "build": "npm run build --workspaces --if-present",
     "dev": "npm run dev --workspaces --if-present",
+    "server": "npm run server --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "devDependencies": {
