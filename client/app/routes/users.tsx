@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useIntersectionObserver } from "@uidotdev/usehooks";
+import { useIntersectionObserver, useIsFirstRender } from "@uidotdev/usehooks";
 import { useFetcher, useSearchParams } from "react-router";
 
 import type { Route } from "./+types/users";
@@ -23,37 +23,64 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export default function Users({ loaderData }: Route.ComponentProps) {
   const parentRef = React.useRef(null);
-  const { users: initalUsers, filters } = loaderData;
-  const [users, setUsers] = useState(initalUsers);
-  const [filteredUsers, setFilteredUsers] = useState<UserEntity[]>();
+  const { users: initalUsers, filters, nextPage: initialNextPage } = loaderData;
+  const [data, setData] = useState({
+    users: initalUsers,
+    page: initialNextPage,
+  });
+
   const [selectedNationalities, setSelectedNationalities] = useState([""]);
   const [selectedHobbies, setSelectedHobbies] = useState([""]);
 
+  const { users, page } = data;
+
   const fetcher = useFetcher<Awaited<typeof getUsers>>();
+  const isFirstRender = useIsFirstRender();
   const [observerRef, entry] = useIntersectionObserver({
     threshold: 0,
     root: null,
   });
 
   const rowVirtualizer = useVirtualizer({
-    count: filteredUsers?.length ?? users.length,
+    count: users.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 35,
     overscan: 5,
   });
+
+  function triggerLoader() {
+    const filters = JSON.stringify({
+      hobbies: selectedHobbies,
+      nationalities: selectedNationalities,
+    });
+    fetcher.load(`?index&page=${page}&filters=${filters}`);
+  }
 
   async function handleAppendUsers() {
     if (fetcher.state === "loading") {
       return;
     }
 
-    fetcher.load(`?index`);
+    triggerLoader();
 
     console.log(fetcher.data);
 
     if (fetcher.data) {
       const newUsers = fetcher.data.users;
-      setUsers((prevUsers) => [...prevUsers, ...newUsers]);
+      setData((prev) => ({
+        users: [...prev.users, ...newUsers],
+        page: prev.page + 1,
+      }));
+    }
+  }
+
+  function handleUpdateUsersV2() {
+    triggerLoader();
+
+    if (fetcher.data) {
+      const { users, nextPage } = fetcher.data;
+      console.log(fetcher.data);
+      setData({ users, page: 1 });
     }
   }
 
@@ -61,18 +88,19 @@ export default function Users({ loaderData }: Route.ComponentProps) {
     const usersByNationality = users.filter((user) => {
       return selectedNationalities.includes(user.nationality);
     });
-
     const usersByHobbies = users.filter((user) => {
       return user.hobbies.some((u) => selectedHobbies.includes(u));
     });
 
     const newUsers = [...usersByNationality, ...usersByHobbies];
 
-    setFilteredUsers(!newUsers.length ? undefined : newUsers);
+    // setFilteredUsers(!newUsers.length ? undefined : newUsers);
   }
 
   useEffect(() => {
-    handleUpdateUsers();
+    if (selectedHobbies.length || selectedNationalities.length) {
+      handleUpdateUsersV2();
+    }
   }, [selectedHobbies, selectedNationalities]);
 
   useEffect(() => {
@@ -101,9 +129,7 @@ export default function Users({ loaderData }: Route.ComponentProps) {
             </section>
             <section className="pt-8 flex flex-col gap-10">
               {rowVirtualizer.getVirtualItems().map((item) => {
-                const user = !filteredUsers
-                  ? users[item.index]
-                  : filteredUsers[item.index];
+                const user = users[item.index];
                 return (
                   <Card
                     key={item.index}

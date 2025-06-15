@@ -13,6 +13,7 @@ export type UserEntity = {
 export type GetUsersResponse = {
   users: Array<UserEntity>;
   filters: { nationalities: string[]; topHobbies: string[] };
+  nextPage: number;
 };
 
 export async function getUsers(request: Request) {
@@ -21,7 +22,14 @@ export async function getUsers(request: Request) {
 
   console.log("hit");
 
+  console.log(params);
+
   const res = await fetch(`${API_URL}/users?${params}`);
   const users = await res.json();
   return users as GetUsersResponse;
+}
+
+export async function getTextResponse() {
+  const res = await fetch(`${API_URL}/chars`);
+  return res;
 }
