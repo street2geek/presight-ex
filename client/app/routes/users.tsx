@@ -8,7 +8,6 @@ import { getUsers } from "~/lib/api";
 import { Sidebar } from "~/components/ui/Sidebar";
 import { Card } from "~/components/ui/Card";
 import { Search } from "~/components/ui/Search";
-import { getSelectedFilters } from "~/lib/utils";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -23,8 +22,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 /**
+ * NOTE: Infitie scrolling is working, when you hit the bottom of the window if it doesnt work first time, scroll up slightly and back down.
  * NOTE: This was a somewhat rushed implementation, so possibly not the cleanest solution, although it is a working example. Would need more time for QA to catch bugs and address issues.
- * TODO: 1. Improve filter selection logic to address bug with filters after reloading browser. 2. Enhance searchbar component. 3. General code clean up/refactor.
+ * TODO: 1. Improve filter selection logic to address bug with filters after reloading browser. 2. Enhance searchbar component. 3. Imporve infinite scrolling & General code clean up/refactor.
  *
  */
 
@@ -55,7 +55,7 @@ export default function Users({ loaderData }: Route.ComponentProps) {
   });
 
   async function handleAppendUsers() {
-    const filterValue = JSON.stringify(getSelectedFilters(searchParams));
+    const filterValue = searchParams.get("filters");
     const queryParam = searchParams.get("query");
     const fp = filterValue ? `&filters=${filterValue}` : "";
     const qp = queryParam ? `&query=${queryParam}` : "";

@@ -1,6 +1,6 @@
 import type { Request } from "express";
 import type { Server } from "socket.io";
-import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
+import { Worker, isMainThread } from "worker_threads";
 
 type QueueItem = {
   id: string;
@@ -15,7 +15,7 @@ export default class WorkerQueue {
     this.#io = io;
   }
 
-  processQueuedRequests() {
+  processQueue() {
     if (isMainThread) {
       const worker = new Worker("./utils/worker.js", {
         workerData: this.#queue,

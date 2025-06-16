@@ -1,11 +1,21 @@
+import type { ChangeEvent } from "react";
 import { Form, useSearchParams } from "react-router";
 
 export function Search() {
-  const [params] = useSearchParams();
+  const [params, setSearchParams] = useSearchParams();
+
+  function handleInputEmpty(e: ChangeEvent<HTMLInputElement>) {
+    if (e.target.value === "") {
+      params.delete("query");
+      setSearchParams(params);
+    }
+  }
+
   return (
     <div className="relative my-6">
       <Form>
         <input
+          onChange={handleInputEmpty}
           defaultValue={params.get("query") ?? ""}
           id="query"
           type="search"

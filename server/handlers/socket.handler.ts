@@ -7,7 +7,7 @@ export function socketHandler(req: Request, res: Response, io: any) {
   wq.enqueue(req, id);
   res.json({ id, status: "pending" });
   try {
-    wq.processQueuedRequests();
+    wq.processQueue();
   } catch (e) {
     console.error(e);
   }

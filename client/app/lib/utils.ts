@@ -20,11 +20,11 @@ export function isFilter(
     : parsedObject.nationalities?.includes(compareValue);
 }
 
-export function getSelectedFilters(params: URLSearchParams) {
+export function parseSelectedFilters(params: URLSearchParams) {
   const selected = params.get("filters");
   if (selected) {
     const pf = JSON.parse(selected);
-    return { hobbies: pf.hobbies, nationalities: pf.nationalities };
+    return pf;
   }
   return;
 }
