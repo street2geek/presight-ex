@@ -1,39 +1,58 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { isFilter, updateFilters } from "~/lib/utils";
 
 type SidebarPops = {
   hobbies: string[];
   nationalities: string[];
-  selectedHobbies: string[] | undefined;
-  selectedNationalities: string[] | undefined;
-  setSelectedHobbies: React.Dispatch<
-    React.SetStateAction<string[] | undefined>
-  >;
-  setSelectedNationalities: React.Dispatch<
-    React.SetStateAction<string[] | undefined>
-  >;
+  handleUpdateFilters: (arg: {
+    hobbies: string[];
+    nationalities: string[];
+  }) => void;
 };
 
 export function Sidebar({
   hobbies,
   nationalities,
-  selectedHobbies,
-  selectedNationalities,
-  setSelectedHobbies,
-  setSelectedNationalities,
+  handleUpdateFilters,
 }: SidebarPops) {
   const [isSideNavOpen, setIsSideNavOpen] = useState(false);
   const [searchParams] = useSearchParams();
 
   function handleUpdateNationalites(selectedItem: string) {
-    const newArray = updateFilters(selectedNationalities, selectedItem);
-    setSelectedNationalities(newArray);
+    const params = searchParams.get("filters");
+    let selectedNationalities = [];
+    let selectedHobbies = [];
+    if (params) {
+      selectedNationalities = JSON.parse(params).nationalities;
+      selectedHobbies = JSON.parse(params).hobbies;
+    }
+
+    const updatedNationalities = updateFilters(
+      selectedNationalities,
+      selectedItem
+    );
+
+    handleUpdateFilters({
+      hobbies: selectedHobbies,
+      nationalities: updatedNationalities,
+    });
   }
 
   function handleUpdateHobbies(selectedItem: string) {
-    const newArray = updateFilters(selectedHobbies, selectedItem);
-    setSelectedHobbies(newArray);
+    const params = searchParams.get("filters");
+    let selectedNationalities = [];
+    let selectedHobbies = [];
+    if (params) {
+      selectedNationalities = JSON.parse(params).nationalities;
+      selectedHobbies = JSON.parse(params).hobbies;
+    }
+    const updatedHobbies = updateFilters(selectedHobbies, selectedItem);
+
+    handleUpdateFilters({
+      hobbies: updatedHobbies,
+      nationalities: selectedNationalities,
+    });
   }
 
   return (
@@ -91,7 +110,7 @@ export function Sidebar({
           <div className="pb-4">
             <h4 className="pl-6 my-4 underline text-slate-700">Hobbies</h4>
             <ul className="flex flex-1 flex-col gap-1 py-3 h-[280px] scroll-auto overflow-auto">
-              {hobbies?.map((hob) => (
+              {hobbies?.sort().map((hob) => (
                 <li
                   key={hob}
                   className="px-6 relative flex flex-wrap items-center"
@@ -120,7 +139,7 @@ export function Sidebar({
           <div className="">
             <h4 className="pl-6 my-4 underline text-slate-700">Nationality</h4>
             <ul className="flex flex-1 flex-col gap-1 py-3 h-[280px] scroll-auto overflow-auto">
-              {nationalities?.map((nat) => (
+              {nationalities?.sort().map((nat) => (
                 <li
                   key={nat}
                   className="px-6 relative flex flex-wrap items-center"
@@ -129,7 +148,7 @@ export function Sidebar({
                     defaultChecked={isFilter(
                       searchParams.get("filters"),
                       nat,
-                      "nationalites"
+                      "nationalities"
                     )}
                     className="w-4 h-4 transition-colors bg-white border-2 rounded appearance-none cursor-pointer focus-visible:outline-none peer border-slate-500 checked:border-emerald-500 checked:bg-emerald-500 checked:hover:border-emerald-600 checked:hover:bg-emerald-600 focus:outline-none checked:focus:border-emerald-700 checked:focus:bg-emerald-700 disabled:cursor-not-allowed disabled:border-slate-100 disabled:bg-slate-50"
                     type="checkbox"

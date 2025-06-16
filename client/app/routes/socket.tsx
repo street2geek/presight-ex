@@ -37,14 +37,20 @@ export default function Socket() {
       const res = await sendSocketRequest();
       tempResults.push(res);
     }
+
     setResults(tempResults);
+  }
+
+  function handleReset() {
+    setResults([]);
+    socket.disconnect();
+    setIsConneected(false);
   }
 
   useEffect(() => {
     return () => {
       socket.off("result", () => console.log("no longer listening to result"));
       socket.off("connect", () => {
-        setIsConneected(false);
         console.log("disconnected from socket server");
       });
     };
@@ -55,7 +61,7 @@ export default function Socket() {
       <div className="container px-6 py-7 m-auto">
         <div className=" flex flex-col items-center  gap-4">
           <Notice connected={isConnected} />
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
             <button
               onClick={handleSocketConnect}
               className="cursor-pointer inline-flex items-center justify-center h-12 gap-2 px-6 text-sm font-medium tracking-wide transition duration-300 border rounded shadow-lg focus-visible:outline-none whitespace-nowrap border-emerald-500 text-emerald-500 shadow-emerald-200 hover:border-emerald-600 hover:text-emerald-600 focus:border-emerald-700 focus:text-emerald-700 hover:shadow-md hover:shadow-emerald-200 focus:shadow-md focus:shadow-emerald-200 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:text-emerald-300 disabled:shadow-none"
@@ -64,9 +70,16 @@ export default function Socket() {
             </button>
             <button
               onClick={handleSendRequests}
-              className="cursor-pointer  inline-flex items-center justify-center h-12 gap-2 px-6 text-sm font-medium tracking-wide transition duration-300 rounded shadow-lg focus-visible:outline-none justify-self-center whitespace-nowrap bg-emerald-50 text-emerald-500 shadow-emerald-100 hover:bg-emerald-100 hover:text-emerald-600 hover:shadow-md hover:shadow-emerald-100 focus:bg-emerald-200 focus:text-emerald-700 focus:shadow-md focus:shadow-emerald-100 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-100 disabled:text-emerald-400 disabled:shadow-none"
+              className="cursor-pointer inline-flex items-center justify-center h-12 gap-2 px-6 text-sm font-medium tracking-wide transition duration-300 border rounded shadow-lg focus-visible:outline-none whitespace-nowrap border-emerald-500 text-emerald-500 shadow-emerald-200 hover:border-emerald-600 hover:text-emerald-600 focus:border-emerald-700 focus:text-emerald-700 hover:shadow-md hover:shadow-emerald-200 focus:shadow-md focus:shadow-emerald-200 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:text-emerald-300 disabled:shadow-none"
             >
               <span>Send Requests</span>
+            </button>
+
+            <button
+              onClick={handleReset}
+              className="cursor-pointer inline-flex items-center justify-center h-8 gap-2 px-4 text-xs font-medium tracking-wide transition duration-300 rounded shadow-md focus-visible:outline-none justify-self-center whitespace-nowrap bg-emerald-50 text-emerald-500 shadow-emerald-100 hover:bg-emerald-100 hover:text-emerald-600 hover:shadow-md hover:shadow-emerald-100 focus:bg-emerald-200 focus:text-emerald-700 focus:shadow-md focus:shadow-emerald-100 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-100 disabled:text-emerald-400 disabled:shadow-none"
+            >
+              <span>Reset</span>
             </button>
           </div>
         </div>

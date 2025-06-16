@@ -17,7 +17,6 @@ export default class WorkerQueue {
 
   #processRequests(item: QueueItem) {
     if (isMainThread) {
-      console.log(item);
       const worker = new Worker("./utils/worker.js", { workerData: item });
       worker.on("message", (res) => {
         this.#io.emit("result", JSON.stringify(res));

@@ -8,6 +8,7 @@ import { getUsers } from "~/lib/api";
 import { Sidebar } from "~/components/ui/Sidebar";
 import { Card } from "~/components/ui/Card";
 import { Search } from "~/components/ui/Search";
+import { getSelectedFilters } from "~/lib/utils";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -30,9 +31,6 @@ export default function Users({ loaderData }: Route.ComponentProps) {
     users: initalUsers,
     page: initialNextPage,
   });
-  const [selectedNationalities, setSelectedNationalities] =
-    useState<string[]>();
-  const [selectedHobbies, setSelectedHobbies] = useState<string[]>();
 
   const { users, page } = data;
 
@@ -42,6 +40,7 @@ export default function Users({ loaderData }: Route.ComponentProps) {
     threshold: 0,
     root: null,
   });
+
   const rowVirtualizer = useVirtualizer({
     count: users.length,
     getScrollElement: () => parentRef.current,
@@ -50,10 +49,7 @@ export default function Users({ loaderData }: Route.ComponentProps) {
   });
 
   async function handleAppendUsers() {
-    const filterValue = JSON.stringify({
-      hobbies: selectedHobbies,
-      nationalities: selectedNationalities,
-    });
+    const filterValue = JSON.stringify(getSelectedFilters(searchParams));
 
     if (fetcher.state === "loading") {
       return;
@@ -70,13 +66,19 @@ export default function Users({ loaderData }: Route.ComponentProps) {
     }
   }
 
-  function handleUpdateUsers() {
+  function handleUpdateUsers({
+    hobbies,
+    nationalities,
+  }: {
+    hobbies: string[];
+    nationalities: string[];
+  }) {
     const filterValue = JSON.stringify({
-      hobbies: selectedHobbies,
-      nationalities: selectedNationalities,
+      hobbies,
+      nationalities,
     });
 
-    if (selectedHobbies || selectedNationalities) {
+    if (hobbies || nationalities) {
       setSearchParams(`?filters=${filterValue}`);
     } else {
       searchParams.delete("filters");
@@ -94,10 +96,6 @@ export default function Users({ loaderData }: Route.ComponentProps) {
   }, [loaderData]);
 
   useEffect(() => {
-    handleUpdateUsers();
-  }, [selectedHobbies, selectedNationalities]);
-
-  useEffect(() => {
     if (entry?.isIntersecting) {
       handleAppendUsers();
     }
@@ -109,10 +107,7 @@ export default function Users({ loaderData }: Route.ComponentProps) {
         <div className="grid grid-cols-4 gap-6 md:grid-cols-8 lg:grid-cols-12">
           <aside className="col-span-4 lg:col-span-3">
             <Sidebar
-              selectedHobbies={selectedHobbies}
-              selectedNationalities={selectedNationalities}
-              setSelectedHobbies={setSelectedHobbies}
-              setSelectedNationalities={setSelectedNationalities}
+              handleUpdateFilters={handleUpdateUsers}
               hobbies={filters.topHobbies}
               nationalities={filters.nationalities}
             />
