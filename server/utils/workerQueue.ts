@@ -3,8 +3,8 @@ import type { Server } from "socket.io";
 import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
 
 type QueueItem = {
-  request: Request;
   id: string;
+  date: string;
 };
 
 export default class WorkerQueue {
@@ -18,7 +18,7 @@ export default class WorkerQueue {
   #processRequests(item: QueueItem) {
     if (isMainThread) {
       console.log(item);
-      const worker = new Worker("./worker.js", { workerData: item });
+      const worker = new Worker("./utils/worker.js", { workerData: item });
       worker.on("message", (res) => {
         this.#io.emit("result", JSON.stringify(res));
       });
@@ -26,8 +26,10 @@ export default class WorkerQueue {
   }
 
   enqueue(request: Request, id: string) {
+    const timeElapsed = Date.now();
+    const today = new Date(timeElapsed);
     this.#queue.push({
-      request,
+      date: today.toUTCString(),
       id,
     });
   }
