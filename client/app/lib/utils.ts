@@ -24,7 +24,7 @@ export function getSelectedFilters(params: URLSearchParams) {
   const selected = params.get("filters");
   if (selected) {
     const pf = JSON.parse(selected);
-    return { hobbies: pf.hobbies, nationalities: pf.nationalites };
+    return { hobbies: pf.hobbies, nationalities: pf.nationalities };
   }
-  return { hobbies: undefined, nationalities: undefined };
+  return;
 }

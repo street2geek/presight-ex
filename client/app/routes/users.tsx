@@ -23,8 +23,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 /**
- * NOTE: This was a somewhat rushed implementation, so possibly not the cleanest solution, although it is a working example.
- * TODO: improve filter selection logic to address bug with filters after refreshing page & general code clean up/refactor.
+ * NOTE: This was a somewhat rushed implementation, so possibly not the cleanest solution, although it is a working example. Would need more time for QA to catch bugs and address issues.
+ * TODO: improve filter selection logic to address bug with filters after reloading browser & general code clean up/refactor.
  *
  */
 
@@ -56,12 +56,13 @@ export default function Users({ loaderData }: Route.ComponentProps) {
 
   async function handleAppendUsers() {
     const filterValue = JSON.stringify(getSelectedFilters(searchParams));
+    const fp = filterValue ? `&filters=${filterValue}` : "";
 
     if (fetcher.state === "loading") {
       return;
     }
 
-    fetcher.load(`?index&page=${page}&filters=${filterValue}`);
+    fetcher.load(`?index&page=${page}${fp}`);
 
     if (fetcher.data) {
       const newUsers = fetcher.data.users;
