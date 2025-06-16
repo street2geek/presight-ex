@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useIntersectionObserver, useIsFirstRender } from "@uidotdev/usehooks";
-import { useFetcher, useSearchParams } from "react-router";
+import { useFetcher, useLoaderData, useSearchParams } from "react-router";
 
 import type { Route } from "./+types/users";
-import { getUsers, type UserEntity } from "~/lib/api";
+import { getUsers } from "~/lib/api";
 import { Sidebar } from "~/components/ui/Sidebar";
 import { Card } from "~/components/ui/Card";
 import { Search } from "~/components/ui/Search";
@@ -22,15 +22,17 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function Users({ loaderData }: Route.ComponentProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const parentRef = React.useRef(null);
   const { users: initalUsers, filters, nextPage: initialNextPage } = loaderData;
+
   const [data, setData] = useState({
     users: initalUsers,
     page: initialNextPage,
   });
-
-  const [selectedNationalities, setSelectedNationalities] = useState([""]);
-  const [selectedHobbies, setSelectedHobbies] = useState([""]);
+  const [selectedNationalities, setSelectedNationalities] =
+    useState<string[]>();
+  const [selectedHobbies, setSelectedHobbies] = useState<string[]>();
 
   const { users, page } = data;
 
@@ -49,11 +51,11 @@ export default function Users({ loaderData }: Route.ComponentProps) {
   });
 
   function triggerLoader() {
-    const filters = JSON.stringify({
+    const filterValue = JSON.stringify({
       hobbies: selectedHobbies,
       nationalities: selectedNationalities,
     });
-    fetcher.load(`?index&page=${page}&filters=${filters}`);
+    fetcher.load(`?index&page=${page}&filters=${filterValue}`);
   }
 
   async function handleAppendUsers() {
@@ -62,8 +64,6 @@ export default function Users({ loaderData }: Route.ComponentProps) {
     }
 
     triggerLoader();
-
-    console.log(fetcher.data);
 
     if (fetcher.data) {
       const newUsers = fetcher.data.users;
@@ -74,33 +74,32 @@ export default function Users({ loaderData }: Route.ComponentProps) {
     }
   }
 
-  function handleUpdateUsersV2() {
-    triggerLoader();
+  function handleUpdateUsers() {
+    const filterValue = JSON.stringify({
+      hobbies: selectedHobbies,
+      nationalities: selectedNationalities,
+    });
 
-    if (fetcher.data) {
-      const { users, nextPage } = fetcher.data;
-      console.log(fetcher.data);
-      setData({ users, page: 1 });
+    if (selectedHobbies || selectedNationalities) {
+      setSearchParams(`?filters=${filterValue}`);
+    } else {
+      searchParams.delete("filters");
+      console.log(searchParams);
     }
-  }
-
-  async function handleUpdateUsers() {
-    const usersByNationality = users.filter((user) => {
-      return selectedNationalities.includes(user.nationality);
-    });
-    const usersByHobbies = users.filter((user) => {
-      return user.hobbies.some((u) => selectedHobbies.includes(u));
-    });
-
-    const newUsers = [...usersByNationality, ...usersByHobbies];
-
-    // setFilteredUsers(!newUsers.length ? undefined : newUsers);
   }
 
   useEffect(() => {
-    if (selectedHobbies.length || selectedNationalities.length) {
-      handleUpdateUsersV2();
+    if (isFirstRender) {
+      return;
     }
+    setData({
+      users: initalUsers,
+      page: initialNextPage,
+    });
+  }, [loaderData]);
+
+  useEffect(() => {
+    handleUpdateUsers();
   }, [selectedHobbies, selectedNationalities]);
 
   useEffect(() => {

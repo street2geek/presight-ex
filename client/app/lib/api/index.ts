@@ -10,17 +10,20 @@ export type UserEntity = {
   hobbies: string[];
 };
 
-export type GetUsersResponse = {
+type GetUsersResponse = {
   users: Array<UserEntity>;
   filters: { nationalities: string[]; topHobbies: string[] };
   nextPage: number;
 };
 
+type sendSocketRequestResponse = {
+  id: string;
+  status: string;
+};
+
 export async function getUsers(request: Request) {
   const url = new URL(request.url);
   const params = new URLSearchParams(url.search);
-
-  console.log("hit");
 
   console.log(params);
 
@@ -32,4 +35,12 @@ export async function getUsers(request: Request) {
 export async function getTextResponse() {
   const res = await fetch(`${API_URL}/chars`);
   return res;
+}
+
+export async function sendSocketRequest() {
+  const res = await fetch(`${API_URL}/socket`, {
+    method: "POST",
+  });
+  const status = await res.json();
+  return status as sendSocketRequestResponse;
 }

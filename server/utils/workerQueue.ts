@@ -1,6 +1,6 @@
 import type { Request } from "express";
+import type { Server } from "socket.io";
 import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
-import type { IOServer } from "./types.ts";
 
 type QueueItem = {
   request: Request;
@@ -8,7 +8,7 @@ type QueueItem = {
 };
 
 export default class WorkerQueue {
-  #io: IOServer;
+  #io: Server;
   #queue: Array<QueueItem> = [];
 
   constructor(io: any) {
@@ -17,17 +17,18 @@ export default class WorkerQueue {
 
   #processRequests(item: QueueItem) {
     if (isMainThread) {
+      console.log(item);
       const worker = new Worker("./worker.js", { workerData: item });
       worker.on("message", (res) => {
-        this.#io.emit(res);
+        this.#io.emit("result", JSON.stringify(res));
       });
     }
   }
 
-  enqueue(request: Request) {
+  enqueue(request: Request, id: string) {
     this.#queue.push({
       request,
-      id: request.headers.date ?? String(Date.now()),
+      id,
     });
   }
 

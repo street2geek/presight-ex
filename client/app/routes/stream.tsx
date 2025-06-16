@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getTextResponse } from "~/lib/api";
 
 export default function Stream() {

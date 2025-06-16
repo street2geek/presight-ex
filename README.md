@@ -28,8 +28,7 @@
 2. Read http response as stream and create a display that will print the response one character at a time
 
    - Create an api that responds with long text (`faker.lorem.paragraphs(32)`)
-   - Read the response as a stream, while the stream is open display the available response one character at a time
-   - Once the stream is closed print entire response
+   - ]
 
 3. Create an api that will process each request in webworker and respond with the result over websocket
 
