@@ -1,4 +1,4 @@
-import { workerData } from "worker_threads";
+import { workerData, parentPort } from "worker_threads";
 
 setTimeout(() => {
   parentPort.postMessage({
