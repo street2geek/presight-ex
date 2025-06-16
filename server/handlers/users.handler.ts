@@ -55,7 +55,10 @@ function getFilteredUsers(
 
 function getUserByName(users: Users, query: string) {
   const newUsers = users.filter((user) => {
-    return user.firstName === query || user.lastName === query;
+    return (
+      user.firstName.toLowerCase() === query.toLowerCase() ||
+      user.lastName.toLowerCase() === query.toLowerCase()
+    );
   });
 
   return newUsers;
