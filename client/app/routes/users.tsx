@@ -22,6 +22,12 @@ export async function loader({ request }: Route.LoaderArgs) {
   return users;
 }
 
+/**
+ * NOTE: This was a somewhat rushed implementation, so possibly not the cleanest solution, although it is a working example.
+ * TODO: improve filter selection logic to address bug with filters after refreshing page & general code clean up/refactor.
+ *
+ */
+
 export default function Users({ loaderData }: Route.ComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const parentRef = React.useRef(null);
@@ -78,10 +84,11 @@ export default function Users({ loaderData }: Route.ComponentProps) {
       nationalities,
     });
 
-    if (hobbies || nationalities) {
+    if (hobbies.length || nationalities.length) {
       setSearchParams(`?filters=${filterValue}`);
     } else {
       searchParams.delete("filters");
+      setSearchParams(searchParams);
     }
   }
 
