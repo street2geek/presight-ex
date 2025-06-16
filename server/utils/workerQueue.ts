@@ -15,9 +15,11 @@ export default class WorkerQueue {
     this.#io = io;
   }
 
-  #processRequests(item: QueueItem) {
+  processQueuedRequests() {
     if (isMainThread) {
-      const worker = new Worker("./utils/worker.js", { workerData: item });
+      const worker = new Worker("./utils/worker.js", {
+        workerData: this.#queue,
+      });
       worker.on("message", (res) => {
         this.#io.emit("result", JSON.stringify(res));
       });
@@ -31,14 +33,5 @@ export default class WorkerQueue {
       date: today.toUTCString(),
       id,
     });
-  }
-
-  processQueuedRequests() {
-    setInterval(() => {
-      if (this.#queue.length > 0) {
-        const item = this.#queue.shift() as QueueItem;
-        this.#processRequests(item);
-      }
-    }, 500);
   }
 }
