@@ -56,13 +56,15 @@ export default function Users({ loaderData }: Route.ComponentProps) {
 
   async function handleAppendUsers() {
     const filterValue = JSON.stringify(getSelectedFilters(searchParams));
+    const queryParam = searchParams.get("query");
     const fp = filterValue ? `&filters=${filterValue}` : "";
+    const qp = queryParam ? `&query=${queryParam}` : "";
 
     if (fetcher.state === "loading") {
       return;
     }
 
-    fetcher.load(`?index&page=${page}${fp}`);
+    fetcher.load(`?index&page=${page}${fp}${qp}`);
 
     if (fetcher.data) {
       const newUsers = fetcher.data.users;
