@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useIntersectionObserver, useIsFirstRender } from "@uidotdev/usehooks";
-import { useFetcher, useLoaderData, useSearchParams } from "react-router";
+import { useFetcher, useSearchParams } from "react-router";
 
 import type { Route } from "./+types/users";
 import { getUsers } from "~/lib/api";
@@ -42,7 +42,6 @@ export default function Users({ loaderData }: Route.ComponentProps) {
     threshold: 0,
     root: null,
   });
-
   const rowVirtualizer = useVirtualizer({
     count: users.length,
     getScrollElement: () => parentRef.current,
@@ -50,20 +49,17 @@ export default function Users({ loaderData }: Route.ComponentProps) {
     overscan: 5,
   });
 
-  function triggerLoader() {
+  async function handleAppendUsers() {
     const filterValue = JSON.stringify({
       hobbies: selectedHobbies,
       nationalities: selectedNationalities,
     });
-    fetcher.load(`?index&page=${page}&filters=${filterValue}`);
-  }
 
-  async function handleAppendUsers() {
     if (fetcher.state === "loading") {
       return;
     }
 
-    triggerLoader();
+    fetcher.load(`?index&page=${page}&filters=${filterValue}`);
 
     if (fetcher.data) {
       const newUsers = fetcher.data.users;
@@ -84,7 +80,6 @@ export default function Users({ loaderData }: Route.ComponentProps) {
       setSearchParams(`?filters=${filterValue}`);
     } else {
       searchParams.delete("filters");
-      console.log(searchParams);
     }
   }
 
