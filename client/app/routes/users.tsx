@@ -24,7 +24,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 /**
  * NOTE: This was a somewhat rushed implementation, so possibly not the cleanest solution, although it is a working example. Would need more time for QA to catch bugs and address issues.
- * TODO: improve filter selection logic to address bug with filters after reloading browser & general code clean up/refactor.
+ * TODO: 1. Improve filter selection logic to address bug with filters after reloading browser. 2. Enhance searchbar component. 3. General code clean up/refactor.
  *
  */
 
